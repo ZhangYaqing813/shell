@@ -14,7 +14,7 @@ service=$1
 
 
 app_web(){
-    echo "=====${app_web}========"
+    echo "当前选择服务： >>>>>> app_web >>>>>>"
     #停掉原有的服务
     ssh -i ${key} ec2-user@${host_web} "ps -ef | grep sig-web-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print \$2}' |xargs kill -9"
     #jar 包进行备份
@@ -23,12 +23,12 @@ app_web(){
     scp -i ${key} ${build_dir_web}/${app_web} ec2-user@${host_web}:${deploy_dir}/
     #服务启动
     ssh -i ${key} ec2-user@${host_web} "source ~/.bash_profile;nohup java -server -Xms256m -Xmx512m -jar ${deploy_dir}/${app_web} --spring.profiles.active=test >>/dev/null 2>&1 &"
-    echo "app_web 执行完成======="
+    echo ">>>>>>app_web 执行完成>>>>>>"
 }
 
 app_client(){
     echo "--------${app_client}--------"
-    ssh -i ${key} ec2-user@${host_client} "ps -ef | grep sig-client-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print \$2}' |xargs kill -9"
+    #ssh -i ${key} ec2-user@${host_client} "ps -ef | grep sig-client-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print \$2}' |xargs kill -9"
     #jar 包进行备份
     ssh -i ${key} ec2-user@${host_client} "cp ${deploy_dir}/${app_client} /data/backup/${app_client}`date +%Y%m%d%H%M%S`"
 
@@ -40,7 +40,7 @@ app_client(){
 
 app_server(){
     echo "************${app_server}**********"
-    ssh -i ${key} ec2-user@${host_server} "ps -ef | grep sig-server-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print \$2}' |xargs kill -9"
+    #ssh -i ${key} ec2-user@${host_server} "ps -ef | grep sig-server-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print \$2}' |xargs kill -9"
     ssh -i ${key} ec2-user@${host_server} "cp ${deploy_dir}/${app_server} /data/backup/${app_server}`date +%Y%m%d%H%M%S`"
     #jar copy
     scp -i ${key} ${build_dir_server}/${app_server} ec2-user@${host_server}:${deploy_dir}/test_server.jar
@@ -48,28 +48,27 @@ app_server(){
     echo "************${app_server}执行完成**********"
 }
 
-echo "当前选择服务： ${service}-----"
 
 case "${service}" in
 
-    "${app_web}")
+    "sig-web")
         app_web
         ;;
 
-    "${app_client}")
+    "sig-client")
         app_client
         ;;
 
-    "${app_server}")
+    "sig-server")
         app_server
         ;;
 
     "all")
+        echo ""
         app_web
-        app_client
         app_server
+        app_client
         ;;
-
     *)
         echo "未找到服务"
         ;;
